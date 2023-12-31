@@ -1,20 +1,26 @@
-fn main() {
+use std::fs::File;
+use std::io::{BufReader, BufRead};
+
+fn main() -> std::io::Result<()> {
+
+    let file = File::open("input.txt")?;
+    let reader = BufReader::new(file);
     let mut sum_of_ids = 0;
 
-    sum_of_ids += check_if_games_is_possible("Game 1: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red");
+    for line in reader.lines() {
+        let line = line?;
+        sum_of_ids += check_if_games_is_possible(&line);
+    }
 
-    println!("{sum_of_ids}")
-
+    println!(" Total : {sum_of_ids}");
+    
+    Ok(())
 }
 
 fn check_if_games_is_possible(text: &str) -> i32 {
     let max_red_cubes = 12;
     let max_green_cubes = 13;
-    let max_blue_cubes = 13;
-
-    let mut current_red_cubes = 0;
-    let mut current_green_cubes = 0;
-    let mut current_blue_cubes = 0;
+    let max_blue_cubes = 14;
     let mut game_id : i32 = 0;
     let mut text = text;
 
@@ -24,8 +30,6 @@ fn check_if_games_is_possible(text: &str) -> i32 {
         text = text.strip_prefix(&remove_text).unwrap();
     }
 
-    println!("{}", text);
-
     let parts = text.split(";");
 
     for part in parts {
@@ -33,32 +37,29 @@ fn check_if_games_is_possible(text: &str) -> i32 {
 
         for color in colors {
             if let Some(result) = color.find("red") {
-                current_red_cubes += &color[..result].trim().parse().unwrap();
+                let red_color : i32 = color[..result].trim().parse().unwrap(); 
+                if  red_color > max_red_cubes {
+                    return 0
+                }
             }
 
             if let Some(result) = color.find("green") {
-                current_green_cubes += &color[..result].trim().parse().unwrap();
+                let green_color : i32 = color[..result].trim().parse().unwrap(); 
+                if green_color > max_green_cubes {
+                    println!("{}", color[..result].trim());
+                    return 0
+                }
             }
 
             if let Some(result) = color.find("blue") {
-                current_blue_cubes += &color[..result].trim().parse().unwrap();
+                let blue_color : i32 = color[..result].trim().parse().unwrap(); 
+                if blue_color > max_blue_cubes {
+                    println!("{}", color[..result].trim());
+                    return 0
+                }
             }
         }
     } 
-
-
-    println!("{current_red_cubes}");
-    println!("{current_green_cubes}");
-    println!("{current_blue_cubes}");
-
-    if current_red_cubes > max_red_cubes 
-        || current_green_cubes > max_green_cubes 
-        || current_blue_cubes > max_blue_cubes {
-        println!("Not possible");
-        return 0
-    } else {
-        println!("Possible");
-    }
 
     game_id 
 }
